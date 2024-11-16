@@ -1,0 +1,27 @@
+import cv2
+import os
+import numpy as np
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+
+# Assuming 'static/images' is the folder where user images are stored
+faces = []
+labels = []
+
+for filename in os.listdir('static/images'):
+    if filename.endswith('.jpg'):
+        image_path = os.path.join('static/images', filename)
+        img = cv2.imread(image_path)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces_detected = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+
+        for (x, y, w, h) in faces_detected:
+            face = gray[y:y+h, x:x+w]
+            faces.append(face)
+            labels.append(0)  # Assigning label 0 for all faces (you can customize labels)
+
+recognizer.train(faces, np.array(labels))
+recognizer.save('face_model.xml')  # Save the trained model
+
+print("Model trained and saved as 'face_model.xml'")
